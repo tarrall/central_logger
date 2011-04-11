@@ -40,7 +40,7 @@ module CentralLogger
       if @level <= severity && message.present? && @mongo_record.present?
         # do not modify the original message used by the buffered logger
         msg = logging_colorized? ? message.gsub(/(\e(\[([\d;]*[mz]?))?)?/, '').strip : message
-        @mongo_record[:messages][LOG_LEVEL_SYM[severity]] << msg
+        @mongo_record[:messages] << [severity, msg]
       end
       # may modify the original message
       super
@@ -54,7 +54,7 @@ module CentralLogger
 
     def mongoize(options={})
       @mongo_record = options.merge({
-        :messages => Hash.new { |hash, key| hash[key] = Array.new },
+        :messages => Array.new,		# was: Hash.new { |hash, key| hash[key] = Array.new },
         :request_time => Time.now.getutc,
         :application_name => @application_name
       })
